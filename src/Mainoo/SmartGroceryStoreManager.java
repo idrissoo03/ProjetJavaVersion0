@@ -1,47 +1,613 @@
 package Mainoo;
 
 import InventaireArticle.*;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import UtilisateurApplication.*;
+import java.time.LocalDate;
+import java.util.Scanner;
+
 
 public class SmartGroceryStoreManager {
     
+    private static Scanner scanner = new Scanner(System.in);
+    private static Inventaire inventaire = new Inventaire();
+    private static Caisse caisse = new Caisse(500.0);
+    private static Map<String, Client> clients = new HashMap<>();
+    private static Map<String, Administrateur> admins = new HashMap<>();
+    
     public static void main(String[] args) {
-        System.out.println("╔════════════════════════════════════════════╗");
-        System.out.println("║  SMART GROCERY STORE MANAGER - DEMO       ║");
-        System.out.println("╚════════════════════════════════════════════╝\n");
+        initialiserDonnees();
         
-        // Initialisation du système
-        Inventaire inventaire = new Inventaire();
-        Caisse caisse = new Caisse(100.0);
+        afficherBanniere();
         
-        // Création des articles
-        System.out.println("📦 Initialisation de l'inventaire...\n");
+        boolean continuer = true;
+        while (continuer) {
+            afficherMenuPrincipal();
+            int choix = lireEntier("Votre choix: ");
+            
+            switch (choix) {
+            case 1:
+                creerCompteClient();
+                break;
+            case 2:
+                connexionClient();
+                break;
+            case 3:
+                return;
+            default:
+                System.out.println("\n   ✗ Choix invalide!");
+        }
+    }
+    
+    private static void creerCompteClient() {
+        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("   ║              CRÉATION DE COMPTE CLIENT                    ║");
+        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
         
+        String id = "C" + String.format("%04d", clients.size() + 1);
+        System.out.print("   Nom complet: ");
+        String nom = scanner.nextLine();
+        System.out.print("   Email: ");
+        String email = scanner.nextLine();
+        System.out.print("   Mot de passe: ");
+        String motDePasse = scanner.nextLine();
+        
+        Client client = new Client(id, nom, email, motDePasse);
+        Client.put(id, client);
+        
+        System.out.println("\n   ✓ Compte créé avec succès!");
+        System.out.println("   Votre ID client: " + id);
+        pauseEtContinuer();
+    }
+    
+    private static void connexionClient() {
+        System.out.print("\n   ID Client: ");
+        String id = scanner.nextLine();
+        System.out.print("   Mot de passe: ");
+        String motDePasse = scanner.nextLine();
+        
+        Client client = clients.get(id);
+        
+        if (client != null && client.getMotDePasse().equals(motDePasse)) {
+            client.connecter();
+            menuClientConnecte(client);
+        } else {
+            System.out.println("\n   ✗ Identifiants incorrects!");
+            pauseEtContinuer();
+        }
+    }
+    
+    private static void menuClientConnecte(Client client) {
+        boolean continuer = true;
+        
+        while (continuer) {
+            System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+            System.out.println("║               MENU CLIENT - " + String.format("%-32s", client.getNom()) + " ║");
+            System.out.println("╠══════════════════════════════════════════════════════════════╣");
+            System.out.println("║  1. 🛍️  Voir tous les produits                               ║");
+            System.out.println("║  2. 🔍 Rechercher un produit                                 ║");
+            System.out.println("║  3. ➕ Ajouter au panier                                     ║");
+            System.out.println("║  4. 🛒 Voir mon panier                                       ║");
+            System.out.println("║  5. ✏️  Modifier quantité dans le panier                     ║");
+            System.out.println("║  6. 🗑️  Supprimer un article du panier                       ║");
+            System.out.println("║  7. 🧹 Vider le panier                                       ║");
+            System.out.println("║  8. 💳 Payer                                                 ║");
+            System.out.println("║  9. 📜 Historique d'achats                                   ║");
+            System.out.println("║  10. 🚪 Déconnexion                                          ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════╝");
+            
+            int choix = lireEntier("Votre choix: ");
+            
+            switch (choix) {
+                case 1:
+                    inventaire.afficherTous();
+                    pauseEtContinuer();
+                    break;
+                case 2:
+                    rechercherProduit();
+                    break;
+                case 3:
+                    ajouterAuPanierClient(client);
+                    break;
+                case 4:
+                    client.getPanier().afficher();
+                    pauseEtContinuer();
+                    break;
+                case 5:
+                    modifierQuantitePanier(client);
+                    break;
+                case 6:
+                    supprimerDuPanier(client);
+                    break;
+                case 7:
+                    client.getPanier().vider();
+                    System.out.println("\n   ✓ Panier vidé!");
+                    pauseEtContinuer();
+                    break;
+                case 8:
+                    client.payer(caisse);
+                    pauseEtContinuer();
+                    break;
+                case 9:
+                    afficherHistoriqueClient(client);
+                    break;
+                case 10:
+                    client.deconnecter();
+                    continuer = false;
+                    break;
+                default:
+                    System.out.println("\n   ✗ Choix invalide!");
+            }
+        }
+    }
+    
+    private static void rechercherProduit() {
+        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("   ║                  RECHERCHE DE PRODUIT                     ║");
+        System.out.println("   ╠═══════════════════════════════════════════════════════════╣");
+        System.out.println("   ║  1. Par nom                                               ║");
+        System.out.println("   ║  2. Par catégorie                                         ║");
+        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+        
+        int choix = lireEntier("Votre choix: ");
+        
+        List<ArticleEpicerie> resultats = new ArrayList<>();
+        
+        if (choix == 1) {
+            System.out.print("\n   Nom du produit: ");
+            String nom = scanner.nextLine();
+            resultats = inventaire.rechercherParNom(nom);
+        } else if (choix == 2) {
+            System.out.print("\n   Catégorie: ");
+            String categorie = scanner.nextLine();
+            resultats = inventaire.rechercherParCategorie(categorie);
+        }
+        
+        if (resultats.isEmpty()) {
+            System.out.println("\n   ℹ️ Aucun produit trouvé");
+        } else {
+            System.out.println("\n   ╔═══════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("   ║                              RÉSULTATS DE LA RECHERCHE                                    ║");
+            System.out.println("   ╚═══════════════════════════════════════════════════════════════════════════════════════════╝");
+            for (ArticleEpicerie article : resultats) {
+                System.out.println("   " + article);
+            }
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void ajouterAuPanierClient(Client client) {
+        System.out.print("\n   ID de l'article: ");
+        String id = scanner.nextLine();
+        
+        ArticleEpicerie article = inventaire.getArticle(id);
+        
+        if (article == null) {
+            System.out.println("   ✗ Article non trouvé!");
+            pauseEtContinuer();
+            return;
+        }
+        
+        System.out.println("\n   Article: " + article.getNom());
+        System.out.println("   Prix: " + article.getPrix() + "€");
+        System.out.println("   Stock disponible: " + article.getQuantiteStock());
+        
+        int quantite = lireEntier("\n   Quantité: ");
+        
+        if (quantite > 0) {
+            client.ajouterAuPanier(article, quantite);
+        } else {
+            System.out.println("   ✗ Quantité invalide!");
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void modifierQuantitePanier(Client client) {
+        if (client.getPanier().estVide()) {
+            System.out.println("\n   ℹ️ Votre panier est vide");
+            pauseEtContinuer();
+            return;
+        }
+        
+        client.getPanier().afficher();
+        
+        System.out.print("\n   ID de l'article à modifier: ");
+        String id = scanner.nextLine();
+        
+        int nouvelleQuantite = lireEntier("   Nouvelle quantité: ");
+        
+        if (nouvelleQuantite > 0) {
+            client.getPanier().modifierQuantite(id, nouvelleQuantite);
+            System.out.println("   ✓ Quantité modifiée!");
+        } else {
+            System.out.println("   ✗ Quantité invalide!");
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void supprimerDuPanier(Client client) {
+        if (client.getPanier().estVide()) {
+            System.out.println("\n   ℹ️ Votre panier est vide");
+            pauseEtContinuer();
+            return;
+        }
+        
+        client.getPanier().afficher();
+        
+        System.out.print("\n   ID de l'article à supprimer: ");
+        String id = scanner.nextLine();
+        
+        client.getPanier().supprimerArticle(id);
+        System.out.println("   ✓ Article supprimé du panier!");
+        pauseEtContinuer();
+    }
+    
+    private static void afficherHistoriqueClient(Client client) {
+        List<Vente> historique = client.getHistorique();
+        
+        if (historique.isEmpty()) {
+            System.out.println("\n   ℹ️ Aucun achat dans l'historique");
+        } else {
+            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("   ║                 HISTORIQUE D'ACHATS                       ║");
+            System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+            
+            for (Vente vente : historique) {
+                System.out.println("\n   Vente ID: " + vente.getIdVente());
+                System.out.println("   Date: " + vente.getDate());
+                System.out.println("   Total: " + String.format("%.2f€", vente.getTotal()));
+                System.out.println("   Articles: " + vente.getArticles().size());
+                System.out.println("   " + "-".repeat(60));
+            }
+        }
+        pauseEtContinuer();
+    }
+    
+    // ==================== MENU ADMINISTRATEUR ====================
+    private static void menuAdministrateur() {
+        System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                 ESPACE ADMINISTRATEUR                        ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════╣");
+        System.out.println("║  1. 📝 Créer un compte administrateur                        ║");
+        System.out.println("║  2. 🔐 Se connecter                                          ║");
+        System.out.println("║  3. 🔙 Retour                                                ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════╝");
+        
+        int choix = lireEntier("Votre choix: ");
+        
+        switch (choix) {
+            case 1:
+                creerCompteAdmin();
+                break;
+            case 2:
+                connexionAdmin();
+                break;
+            case 3:
+                return;
+            default:
+                System.out.println("\n   ✗ Choix invalide!");
+        }
+    }
+    
+    private static void creerCompteAdmin() {
+        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("   ║          CRÉATION DE COMPTE ADMINISTRATEUR                ║");
+        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+        
+        String id = "A" + String.format("%04d", admins.size() + 1);
+        System.out.print("   Nom complet: ");
+        String nom = scanner.nextLine();
+        System.out.print("   Email: ");
+        String email = scanner.nextLine();
+        System.out.print("   Mot de passe: ");
+        String motDePasse = scanner.nextLine();
+        
+        Administrateur admin = new Administrateur(id, nom, email, motDePasse);
+        admins.put(id, admin);
+        
+        System.out.println("\n   ✓ Compte administrateur créé avec succès!");
+        System.out.println("   Votre ID admin: " + id);
+        pauseEtContinuer();
+    }
+    
+    private static void connexionAdmin() {
+        System.out.print("\n   ID Admin: ");
+        String id = scanner.nextLine();
+        System.out.print("   Mot de passe: ");
+        String motDePasse = scanner.nextLine();
+        
+        Administrateur admin = admins.get(id);
+        
+        if (admin != null && admin.getMotDePasse().equals(motDePasse)) {
+            admin.connecter();
+            menuAdminConnecte(admin);
+        } else {
+            System.out.println("\n   ✗ Identifiants incorrects!");
+            pauseEtContinuer();
+        }
+    }
+    
+    private static void menuAdminConnecte(Administrateur admin) {
+        boolean continuer = true;
+        
+        while (continuer) {
+            System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+            System.out.println("║             MENU ADMINISTRATEUR - " + String.format("%-23s", admin.getNom()) + " ║");
+            System.out.println("╠══════════════════════════════════════════════════════════════╣");
+            System.out.println("║  1. 📦 Voir l'inventaire complet                             ║");
+            System.out.println("║  2. ➕ Ajouter un article                                    ║");
+            System.out.println("║  3. ✏️  Modifier un article                                   ║");
+            System.out.println("║  4. 🗑️  Supprimer un article                                  ║");
+            System.out.println("║  5. 🔍 Rechercher un article                                 ║");
+            System.out.println("║  6. 📊 Générer un rapport                                    ║");
+            System.out.println("║  7. 💰 Voir les ventes du jour                               ║");
+            System.out.println("║  8. ⚠️  Vérifier les articles périmés                         ║");
+            System.out.println("║  9. 👥 Liste des clients                                     ║");
+            System.out.println("║  10. 🚪 Déconnexion                                          ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════╝");
+            
+            int choix = lireEntier("Votre choix: ");
+            
+            switch (choix) {
+                case 1:
+                    inventaire.afficherTous();
+                    pauseEtContinuer();
+                    break;
+                case 2:
+                    ajouterArticleAdmin(admin);
+                    break;
+                case 3:
+                    modifierArticleAdmin(admin);
+                    break;
+                case 4:
+                    supprimerArticleAdmin(admin);
+                    break;
+                case 5:
+                    rechercherProduit();
+                    break;
+                case 6:
+                    admin.genererRapport(caisse, inventaire);
+                    pauseEtContinuer();
+                    break;
+                case 7:
+                    afficherVentesJour();
+                    break;
+                case 8:
+                    verifierArticlesPerimes();
+                    break;
+                case 9:
+                    afficherListeClients();
+                    break;
+                case 10:
+                    admin.deconnecter();
+                    continuer = false;
+                    break;
+                default:
+                    System.out.println("\n   ✗ Choix invalide!");
+            }
+        }
+    }
+    
+    private static void ajouterArticleAdmin(Administrateur admin) {
+        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("   ║                   AJOUTER UN ARTICLE                      ║");
+        System.out.println("   ╠═══════════════════════════════════════════════════════════╣");
+        System.out.println("   ║  1. Article périssable                                    ║");
+        System.out.println("   ║  2. Article non périssable                                ║");
+        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+        
+        int typeChoix = lireEntier("Type d'article: ");
+        
+        System.out.print("\n   ID de l'article: ");
+        String id = scanner.nextLine();
+        System.out.print("   Nom: ");
+        String nom = scanner.nextLine();
+        double prix = lireDouble("   Prix: ");
+        int stock = lireEntier("   Quantité en stock: ");
+        System.out.print("   Catégorie: ");
+        String categorie = scanner.nextLine();
+        
+        ArticleEpicerie article = null;
+        
+        if (typeChoix == 1) {
+            System.out.print("   Date d'expiration (AAAA-MM-JJ): ");
+            String dateStr = scanner.nextLine();
+            try {
+                LocalDate dateExpiration = LocalDate.parse(dateStr);
+                article = new ArticlePerissable(id, nom, prix, stock, categorie, dateExpiration);
+            } catch (Exception e) {
+                System.out.println("   ✗ Format de date invalide!");
+                pauseEtContinuer();
+                return;
+            }
+        } else if (typeChoix == 2) {
+            int dureeConservation = lireEntier("   Durée de conservation (jours): ");
+            article = new ArticleNonPerissable(id, nom, prix, stock, categorie, dureeConservation);
+        }
+        
+        if (article != null) {
+            admin.ajouterArticle(inventaire, article);
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void modifierArticleAdmin(Administrateur admin) {
+        System.out.print("\n   ID de l'article à modifier: ");
+        String id = scanner.nextLine();
+        
+        ArticleEpicerie article = inventaire.getArticle(id);
+        
+        if (article == null) {
+            System.out.println("   ✗ Article non trouvé!");
+            pauseEtContinuer();
+            return;
+        }
+        
+        System.out.println("\n   Article actuel: " + article);
+        System.out.println("\n   Entrez les nouvelles valeurs (Entrée pour garder l'ancienne):");
+        
+        System.out.print("   Nouveau nom [" + article.getNom() + "]: ");
+        String nom = scanner.nextLine();
+        if (nom.isEmpty()) nom = article.getNom();
+        
+        System.out.print("   Nouveau prix [" + article.getPrix() + "]: ");
+        String prixStr = scanner.nextLine();
+        double prix = prixStr.isEmpty() ? article.getPrix() : Double.parseDouble(prixStr);
+        
+        System.out.print("   Nouveau stock [" + article.getQuantiteStock() + "]: ");
+        String stockStr = scanner.nextLine();
+        int stock = stockStr.isEmpty() ? article.getQuantiteStock() : Integer.parseInt(stockStr);
+        
+        System.out.print("   Nouvelle catégorie [" + article.getCategorie() + "]: ");
+        String categorie = scanner.nextLine();
+        if (categorie.isEmpty()) categorie = article.getCategorie();
+        
+        admin.modifierArticle(inventaire, id, nom, prix, stock, categorie);
+        pauseEtContinuer();
+    }
+    
+    private static void supprimerArticleAdmin(Administrateur admin) {
+        System.out.print("\n   ID de l'article à supprimer: ");
+        String id = scanner.nextLine();
+        
+        ArticleEpicerie article = inventaire.getArticle(id);
+        
+        if (article != null) {
+            System.out.println("\n   Article: " + article);
+            System.out.print("   Confirmer la suppression? (O/N): ");
+            String confirmation = scanner.nextLine();
+            
+            if (confirmation.equalsIgnoreCase("O")) {
+                admin.supprimerArticle(inventaire, id);
+            } else {
+                System.out.println("   Suppression annulée");
+            }
+        } else {
+            System.out.println("   ✗ Article non trouvé!");
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void afficherVentesJour() {
+        List<Vente> ventes = caisse.getVentesJournalieres();
+        
+        if (ventes.isEmpty()) {
+            System.out.println("\n   ℹ️ Aucune vente aujourd'hui");
+        } else {
+            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("   ║                  VENTES DU JOUR                           ║");
+            System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+            
+            for (Vente vente : ventes) {
+                System.out.println("\n   ID: " + vente.getIdVente() + " | Date: " + vente.getDate() + 
+                                 " | Total: " + String.format("%.2f€", vente.getTotal()));
+                System.out.println("   Articles vendus: " + vente.getArticles().size());
+            }
+            
+            System.out.println("\n   " + "=".repeat(60));
+            System.out.println("   Total des ventes: " + String.format("%.2f€", caisse.getTotalVentes()));
+            System.out.println("   Nombre de transactions: " + ventes.size());
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void verifierArticlesPerimes() {
+        List<ArticleEpicerie> perimes = inventaire.iterArticlesPerimes();
+        
+        if (perimes.isEmpty()) {
+            System.out.println("\n   ✓ Aucun article périmé");
+        } else {
+            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("   ║              ⚠️  ARTICLES PÉRIMÉS  ⚠️                      ║");
+            System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+            
+            for (ArticleEpicerie article : perimes) {
+                System.out.println("   " + article);
+            }
+            
+            System.out.println("\n   Total: " + perimes.size() + " article(s) périmé(s)");
+        }
+        
+        // Afficher aussi les articles qui vont bientôt expirer
+        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("   ║           ARTICLES PROCHES DE L'EXPIRATION                ║");
+        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+        
+        boolean aucunProche = true;
+        for (ArticleEpicerie article : inventaire.getArticles().values()) {
+            if (article instanceof ArticlePerissable) {
+                ArticlePerissable perissable = (ArticlePerissable) article;
+                if (!perissable.estPerime() && perissable.getJoursRestants() <= 7) {
+                    System.out.println("   " + article);
+                    aucunProche = false;
+                }
+            }
+        }
+        
+        if (aucunProche) {
+            System.out.println("   ✓ Aucun article proche de l'expiration");
+        }
+        
+        pauseEtContinuer();
+    }
+    
+    private static void afficherListeClients() {
+        if (clients.isEmpty()) {
+            System.out.println("\n   ℹ️ Aucun client enregistré");
+        } else {
+            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("   ║                    LISTE DES CLIENTS                      ║");
+            System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
+            
+            for (Client client : clients.values()) {
+                System.out.println(String.format("   ID: %s | Nom: %-30s | Email: %s", 
+                    client.getId(), client.getNom(), client.getEmail()));
+                System.out.println("   Achats effectués: " + client.getHistorique().size());
+                System.out.println("   " + "-".repeat(60));
+            }
+            
+            System.out.println("\n   Total clients: " + clients.size());
+        }
+        pauseEtContinuer();
+    }
+    
+    // ==================== MÉTHODES UTILITAIRES ====================
+    private static void initialiserDonnees() {
+        // Créer des articles de démonstration
         ArticlePerissable lait = new ArticlePerissable(
-            "A001", "Lait", 1.50, 50, "Produits laitiers", 
+            "A001", "Lait demi-écrémé 1L", 1.50, 50, "Produits laitiers", 
             LocalDate.now().plusDays(5)
         );
         
         ArticlePerissable pain = new ArticlePerissable(
-            "A002", "Pain", 1.20, 30, "Boulangerie", 
+            "A002", "Pain complet", 1.20, 30, "Boulangerie", 
             LocalDate.now().plusDays(2)
         );
         
         ArticleNonPerissable pates = new ArticleNonPerissable(
-            "A003", "Pâtes", 2.50, 100, "Épicerie salée", 365
+            "A003", "Pâtes Spaghetti 500g", 2.50, 100, "Épicerie salée", 365
         );
         
         ArticleNonPerissable riz = new ArticleNonPerissable(
-            "A004", "Riz", 3.00, 80, "Épicerie salée", 730
+            "A004", "Riz Basmati 1kg", 3.00, 80, "Épicerie salée", 730
         );
         
         ArticlePerissable fromage = new ArticlePerissable(
-            "A005", "Fromage", 4.50, 25, "Produits laitiers", 
+            "A005", "Fromage Camembert", 4.50, 25, "Produits laitiers", 
             LocalDate.now().plusDays(10)
+        );
+        
+        ArticlePerissable yaourt = new ArticlePerissable(
+            "A006", "Yaourt nature x4", 2.80, 40, "Produits laitiers", 
+            LocalDate.now().plusDays(15)
+        );
+        
+        ArticleNonPerissable huile = new ArticleNonPerissable(
+            "A007", "Huile d'olive 1L", 8.50, 30, "Épicerie salée", 545
+        );
+        
+        ArticlePerissable tomates = new ArticlePerissable(
+            "A008", "Tomates fraîches 1kg", 3.20, 50, "Fruits et légumes", 
+            LocalDate.now().plusDays(4)
         );
         
         inventaire.ajouterArticle(lait);
@@ -49,96 +615,93 @@ public class SmartGroceryStoreManager {
         inventaire.ajouterArticle(pates);
         inventaire.ajouterArticle(riz);
         inventaire.ajouterArticle(fromage);
+        inventaire.ajouterArticle(yaourt);
+        inventaire.ajouterArticle(huile);
+        inventaire.ajouterArticle(tomates);
         
-        System.out.println("✓ " + inventaire.getArticles().size() + " articles ajoutés à l'inventaire\n");
+        // Créer un administrateur par défaut
+        Administrateur adminDefault = new Administrateur("A0001", "Admin Principal", "admin@store.com", "admin123");
+        admins.put("A0001", adminDefault);
         
-        // Vérification des articles périssables
-        pain.activerAlerte();
-        
-        // Création des utilisateurs
-        Client client1 = new Client("C001", "Alice Dupont", "alice@email.com", "pass123");
-        Client client2 = new Client("C002", "Bob Martin", "bob@email.com", "pass456");
-        Administrateur admin = new Administrateur("A001", "Sophie Admin", "admin@store.com", "admin123");
-        
-        System.out.println("\n👥 Utilisateurs créés:");
-        System.out.println("   • Client: " + client1.getNom());
-        System.out.println("   • Client: " + client2.getNom());
-        System.out.println("   • Admin: " + admin.getNom());
-        
-        // Simulation 1: Client Alice fait ses courses
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("SIMULATION 1: ACHAT CLIENT ALICE");
-        System.out.println("=".repeat(50));
-        
-        client1.connecter();
-        
-        System.out.println("\n🛒 Alice fait ses courses:");
-        client1.ajouterAuPanier(lait, 2);
-        client1.ajouterAuPanier(pain, 1);
-        client1.ajouterAuPanier(fromage, 1);
-        
-        System.out.println("\n💰 Panier d'Alice:");
-        for (LignePanier ligne : client1.getPanier().getLignes()) {
-            System.out.println("   • " + ligne.getArticle().getNom() + 
-                             " x" + ligne.getQuantite() + 
-                             " = " + String.format("%.2f€", ligne.getTotal()));
-        }
-        System.out.println("   TOTAL: " + String.format("%.2f€", client1.getPanier().getTotal()));
-        
-        Vente vente1 = client1.payer(caisse);
-        admin.validerVente(vente1);
-        
-        client1.deconnecter();
-        
-        // Simulation 2: Client Bob fait ses courses
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("SIMULATION 2: ACHAT CLIENT BOB");
-        System.out.println("=".repeat(50));
-        
-        client2.connecter();
-        
-        System.out.println("\n🛒 Bob fait ses courses:");
-        client2.ajouterAuPanier(pates, 3);
-        client2.ajouterAuPanier(riz, 2);
-        client2.ajouterAuPanier(lait, 1);
-        
-        System.out.println("\n💡 Suggestions pour Bob:");
-        List<String> suggestions = client2.consulterSuggestions();
-        for (String suggestion : suggestions) {
-            System.out.println("   " + suggestion);
-        }
-        
-        Vente vente2 = client2.payer(caisse);
-        
-        client2.deconnecter();
-        
-        // Administration
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("SIMULATION 3: GESTION ADMINISTRATIVE");
-        System.out.println("=".repeat(50));
-        
-        admin.connecter();
-        
-        admin.gererInventaire(inventaire);
-        admin.genererRapport(caisse, inventaire);
-        
-        // Rapport de caisse
-        RapportCaisse rapportCaisse = new RapportCaisse(
-            LocalDate.now(), 
-            caisse.getVentesJournalieres(), 
-            caisse.getFondDeCaisse()
-        );
-        
-        System.out.println("\n💵 Rapport de caisse détaillé:");
-        System.out.println("   • Fond initial: " + String.format("%.2s€", rapportCaisse.getDate()));
-        System.out.println("   • Ventes du jour: " + rapportCaisse.getVentes().size());
-        System.out.println("   • Total des ventes: " + String.format("%.2f€", rapportCaisse.getTotal()));
-        System.out.println("   • Fond final: " + String.format("%.2f€", rapportCaisse.getFondFinal()));
-        
-        admin.deconnecter();
-        
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("✓ DÉMONSTRATION TERMINÉE");
-        System.out.println("=".repeat(50));
+        // Créer un client de test
+        Client clientTest = new Client("C0001", "Jean Dupont", "jean@email.com", "client123");
+        clients.put("C0001", clientTest);
     }
-}
+    
+    private static int lireEntier(String message) {
+        System.out.print(message);
+        while (!scanner.hasNextInt()) {
+            scanner.next();
+            System.out.print("   ✗ Veuillez entrer un nombre valide: ");
+        }
+        int valeur = scanner.nextInt();
+        scanner.nextLine(); // Consommer le retour à la ligne
+        return valeur;
+    }
+    
+    private static double lireDouble(String message) {
+        System.out.print(message);
+        while (!scanner.hasNextDouble()) {
+            scanner.next();
+            System.out.print("   ✗ Veuillez entrer un nombre valide: ");
+        }
+        double valeur = scanner.nextDouble();
+        scanner.nextLine(); // Consommer le retour à la ligne
+        return valeur;
+    }
+    
+    private static void pauseEtContinuer() {
+        System.out.print("\n   Appuyez sur Entrée pour continuer...");
+        scanner.nextLine();
+    } (choix) {
+                case 1:
+                    menuClient();
+                    break;
+                case 2:
+                    menuAdministrateur();
+                    break;
+                case 3:
+                    System.out.println("\n   Merci d'avoir utilisé Smart Grocery Store Manager!");
+                    continuer = false;
+                    break;
+                default:
+                    System.out.println("\n   ✗ Choix invalide!");
+            }
+        }
+        
+        scanner.close();
+    }
+    
+    private static void afficherBanniere() {
+        System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                                                              ║");
+        System.out.println("║        🛒  SMART GROCERY STORE MANAGER  🛒                   ║");
+        System.out.println("║                                                              ║");
+        System.out.println("║              Système de Gestion d'Épicerie                   ║");
+        System.out.println("║                                                              ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════╝");
+    }
+    
+    private static void afficherMenuPrincipal() {
+        System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                      MENU PRINCIPAL                          ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════╣");
+        System.out.println("║  1. 👤 Espace Client                                         ║");
+        System.out.println("║  2. 👨‍💼 Espace Administrateur                                 ║");
+        System.out.println("║  3. 🚪 Quitter                                                ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════╝");
+    }
+    
+    // ==================== MENU CLIENT ====================
+    private static void menuClient() {
+        System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                     ESPACE CLIENT                            ║");
+        System.out.println("╠══════════════════════════════════════════════════════════════╣");
+        System.out.println("║  1. 📝 Créer un nouveau compte                               ║");
+        System.out.println("║  2. 🔐 Se connecter                                          ║");
+        System.out.println("║  3. 🔙 Retour                                                ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════╝");
+        
+        int choix = lireEntier("Votre choix: ");
+        
+        switch

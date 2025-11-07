@@ -37,7 +37,7 @@ public class ArticleEpicerie {
     
     @Override
     public String toString() {
-        return "Article{" + "id='" + id + "', nom='" + nom + "', prix=" + prix + 
-               ", stock=" + quantiteStock + ", categorie='" + categorie + "'}";
+        return String.format("ID: %s | %-20s | Prix: %6.2f€ | Stock: %4d | Catégorie: %s", 
+            id, nom, prix, quantiteStock, categorie);
     }
 }

@@ -1,12 +1,11 @@
 package UtilisateurApplication;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import InventaireArticle.*;
 
-public class RapportCaisse {
+class RapportCaisse {
     private LocalDate date;
     private List<Vente> ventes;
     private double total;

@@ -14,53 +14,65 @@ public class Administrateur extends Utilisateur {
     
     @Override
     public void connecter() {
-        System.out.println("✓ Administrateur " + getNom() + " connecté (accès complet)");
+        System.out.println("\n   ✓ Administrateur " + getNom() + " connecté (accès complet au système)");
     }
     
     @Override
     public void deconnecter() {
-        System.out.println("✓ Administrateur " + getNom() + " déconnecté");
+        System.out.println("\n   ✓ Administrateur " + getNom() + " déconnecté");
     }
     
-    public List<String> gererInventaire(Inventaire inventaire) {
-        System.out.println("\n📦 Gestion de l'inventaire...");
-        List<String> actions = new ArrayList<>();
-        actions.add("→ Vérification des stocks");
-        actions.add("→ " + inventaire.getArticles().size() + " articles en inventaire");
-        actions.add("→ Valeur totale: " + String.format("%.2f€", inventaire.calculerValeurStock()));
-        
-        List<ArticleEpicerie> perimes = inventaire.iterArticlesPerimes();
-        if (!perimes.isEmpty()) {
-            actions.add("⚠️ " + perimes.size() + " article(s) périmé(s) détecté(s)");
+    public void ajouterArticle(Inventaire inventaire, ArticleEpicerie article) {
+        inventaire.ajouterArticle(article);
+        System.out.println("   ✓ Article " + article.getNom() + " ajouté à l'inventaire");
+    }
+    
+    public void supprimerArticle(Inventaire inventaire, String id) {
+        ArticleEpicerie article = inventaire.getArticle(id);
+        if (article != null) {
+            inventaire.supprimerArticle(id);
+            System.out.println("   ✓ Article " + article.getNom() + " supprimé de l'inventaire");
+        } else {
+            System.out.println("   ✗ Article non trouvé");
         }
-        
-        for (String action : actions) {
-            System.out.println(action);
+    }
+    
+    public void modifierArticle(Inventaire inventaire, String id, String nom, double prix, int stock, String categorie) {
+        ArticleEpicerie article = inventaire.getArticle(id);
+        if (article != null) {
+            article.setNom(nom);
+            article.setPrix(prix);
+            article.setQuantiteStock(stock);
+            article.setCategorie(categorie);
+            System.out.println("   ✓ Article modifié avec succès");
+        } else {
+            System.out.println("   ✗ Article non trouvé");
         }
-        return actions;
     }
     
     public String genererRapport(Caisse caisse, Inventaire inventaire) {
-        System.out.println("\n📊 Génération du rapport...");
         StringBuilder rapport = new StringBuilder();
-        rapport.append("\n╔════════════════════════════════════╗\n");
-        rapport.append("║     RAPPORT DE GESTION QUOTIDIEN   ║\n");
-        rapport.append("╚════════════════════════════════════╝\n");
-        rapport.append("Date: ").append(LocalDate.now()).append("\n\n");
-        
-        rapport.append("--- VENTES ---\n");
-        rapport.append("Nombre de transactions: ").append(caisse.getVentesJournalieres().size()).append("\n");
-        rapport.append("Chiffre d'affaires: ").append(String.format("%.2f€", caisse.getTotalVentes())).append("\n");
-        rapport.append("Fond de caisse: ").append(String.format("%.2f€", caisse.getFondDeCaisse())).append("\n\n");
-        
-        rapport.append("--- INVENTAIRE ---\n");
-        rapport.append("Articles en stock: ").append(inventaire.getArticles().size()).append("\n");
-        rapport.append("Valeur du stock: ").append(String.format("%.2f€", inventaire.calculerValeurStock())).append("\n");
+        rapport.append("\n   ╔════════════════════════════════════════════════════════════╗\n");
+        rapport.append("   ║              RAPPORT DE GESTION QUOTIDIEN                  ║\n");
+        rapport.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        rapport.append(String.format("   ║ Date: %-52s ║%n", LocalDate.now()));
+        rapport.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        rapport.append("   ║                        VENTES                              ║\n");
+        rapport.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        rapport.append(String.format("   ║ Nombre de transactions: %-34d ║%n", caisse.getVentesJournalieres().size()));
+        rapport.append(String.format("   ║ Chiffre d'affaires:                         %10.2f€ ║%n", caisse.getTotalVentes()));
+        rapport.append(String.format("   ║ Fond de caisse initial:                     %10.2f€ ║%n", caisse.getFondDeCaisse()));
+        rapport.append(String.format("   ║ Fond de caisse actuel:                      %10.2f€ ║%n", caisse.getFondDeCaisse() + caisse.getTotalVentes()));
+        rapport.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        rapport.append("   ║                      INVENTAIRE                            ║\n");
+        rapport.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        rapport.append(String.format("   ║ Articles en stock: %-39d ║%n", inventaire.getArticles().size()));
+        rapport.append(String.format("   ║ Valeur du stock:                            %10.2f€ ║%n", inventaire.calculerValeurStock()));
         
         List<ArticleEpicerie> perimes = inventaire.iterArticlesPerimes();
-        rapport.append("Articles périmés: ").append(perimes.size()).append("\n");
+        rapport.append(String.format("   ║ Articles périmés: %-40d ║%n", perimes.size()));
         
-        rapport.append("\n════════════════════════════════════\n");
+        rapport.append("   ╚════════════════════════════════════════════════════════════╝\n");
         
         String rapportStr = rapport.toString();
         System.out.println(rapportStr);
@@ -69,9 +81,9 @@ public class Administrateur extends Utilisateur {
     
     public void validerVente(Vente vente) {
         if (vente != null) {
-            System.out.println("✓ Vente " + vente.getIdVente() + " validée par l'administrateur");
+            System.out.println("   ✓ Vente " + vente.getIdVente() + " validée par l'administrateur");
         } else {
-            System.out.println("✗ Vente invalide");
+            System.out.println("   ✗ Vente invalide");
         }
     }
 }

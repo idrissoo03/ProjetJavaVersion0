@@ -47,20 +47,26 @@ public class Vente {
     
     public String genererFacture() {
         StringBuilder facture = new StringBuilder();
-        facture.append("\n========== FACTURE ==========\n");
-        facture.append("ID Vente: ").append(idVente).append("\n");
-        facture.append("Date: ").append(date).append("\n");
-        facture.append("-----------------------------\n");
+        facture.append("\n   ╔════════════════════════════════════════════════════════════╗\n");
+        facture.append("   ║                         FACTURE                            ║\n");
+        facture.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        facture.append(String.format("   ║ ID Vente: %-47s ║%n", idVente));
+        facture.append(String.format("   ║ Date: %-51s ║%n", date));
+        facture.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        
         for (LigneVente ligne : articles) {
-            facture.append(String.format("%s x%d - %.2f€\n", 
+            facture.append(String.format("   ║ %-30s x%-3d = %8.2f€ ║%n", 
                 ligne.getArticle().getNom(), 
                 ligne.getQuantite(), 
                 ligne.getSousTotal()));
         }
-        facture.append("-----------------------------\n");
-        facture.append(String.format("Taxe (20%%): %.2f€\n", taxe));
-        facture.append(String.format("TOTAL: %.2f€\n", total));
-        facture.append("=============================\n");
+        
+        facture.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        facture.append(String.format("   ║ Sous-total:                                 %10.2f€ ║%n", total - taxe));
+        facture.append(String.format("   ║ TVA (20%%):                                  %10.2f€ ║%n", taxe));
+        facture.append(String.format("   ║ TOTAL:                                      %10.2f€ ║%n", total));
+        facture.append("   ╚════════════════════════════════════════════════════════════╝\n");
+        
         return facture.toString();
     }
 }

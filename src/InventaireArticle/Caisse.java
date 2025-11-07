@@ -15,7 +15,7 @@ public class Caisse {
     public double getFondDeCaisse() { return fondDeCaisse; }
     
     public Vente enregistrerVente(Panier panier) {
-        Vente vente = new Vente("V" + (ventesJournalieres.size() + 1));
+        Vente vente = new Vente("V" + String.format("%04d", ventesJournalieres.size() + 1));
         vente.enregistrerVente(panier);
         ventesJournalieres.add(vente);
         return vente;

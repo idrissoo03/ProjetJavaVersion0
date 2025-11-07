@@ -34,8 +34,16 @@ public class ArticlePerissable extends ArticleEpicerie {
     }
     
     public void activerAlerte() {
-        if (joursRestants <= 3) {
+        if (joursRestants <= 3 && joursRestants > 0) {
             System.out.println("⚠️ ALERTE: Article " + getNom() + " expire dans " + joursRestants + " jours!");
+        } else if (joursRestants <= 0) {
+            System.out.println("❌ PÉRIMÉ: Article " + getNom() + " est périmé!");
         }
+    }
+    
+    @Override
+    public String toString() {
+        String statut = estPerime() ? "❌ PÉRIMÉ" : (joursRestants <= 3 ? "⚠️ Expire bientôt" : "✓ OK");
+        return super.toString() + String.format(" | Expiration: %s (%s)", dateExpiration, statut);
     }
 }

@@ -11,4 +11,9 @@ public class ArticleNonPerissable extends ArticleEpicerie {
     
     public int getDureeConservation() { return dureeConservation; }
     public void setDureeConservation(int dureeConservation) { this.dureeConservation = dureeConservation; }
+    
+    @Override
+    public String toString() {
+        return super.toString() + String.format(" | Conservation: %d jours", dureeConservation);
+    }
 }

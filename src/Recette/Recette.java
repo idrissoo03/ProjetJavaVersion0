@@ -1,11 +1,12 @@
 package Recette;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
-import InventaireArticle.ArticleEpicerie;
+import InventaireArticle.*;
 
-public class Recette {
+class Recette {
     private String nom;
     private List<ArticleEpicerie> ingredients;
     private int tempsPreparation;
