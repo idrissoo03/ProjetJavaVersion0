@@ -6,7 +6,7 @@ import java.util.List;
 
 import InventaireArticle.*;
 
-class Recette {
+public class Recette {
     private String nom;
     private List<ArticleEpicerie> ingredients;
     private int tempsPreparation;

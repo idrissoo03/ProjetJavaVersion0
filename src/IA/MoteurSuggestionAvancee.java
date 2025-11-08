@@ -5,7 +5,7 @@ import Recette.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class MoteurSuggestionAvancee extends MoteurSuggestion implements SuggestionIA {
+public class MoteurSuggestionAvancee extends MoteurSuggestion implements SuggestionIA {
     public MoteurSuggestionAvancee(String moteur) {
         super(moteur);
     }
