@@ -627,8 +627,8 @@ public class SmartGroceryStoreManager {
     }
     
     private static void afficherSuggestionsProduits(Client client) {
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("   ║            SUGGESTIONS DE PRODUITS PERSONNALISÉES          ║");
+        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("   ║            SUGGESTIONS DE PRODUITS PERSONNALISÉES         ║");
         System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
         
         // Suggestions basées sur l'historique
