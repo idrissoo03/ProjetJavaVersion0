@@ -52,7 +52,7 @@ public class Administrateur extends Utilisateur {
     
     public String genererRapport(Caisse caisse, Inventaire inventaire) {
         StringBuilder rapport = new StringBuilder();
-        rapport.append("\n   ╔════════════════════════════════════════════════════════════╗\n");
+        rapport.append("\n ╔════════════════════════════════════════════════════════════╗\n");
         rapport.append("   ║              RAPPORT DE GESTION QUOTIDIEN                  ║\n");
         rapport.append("   ╠════════════════════════════════════════════════════════════╣\n");
         rapport.append(String.format("   ║ Date: %-52s ║%n", LocalDate.now()));

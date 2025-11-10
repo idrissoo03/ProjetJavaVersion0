@@ -17,9 +17,8 @@ public class SmartGroceryStoreManager {
     private static Scanner scanner = new Scanner(System.in);
     private static Inventaire inventaire = new Inventaire();
     private static Caisse caisse = new Caisse(500.0);
-    private static Map<String, Client> clients = new HashMap<>();
     private static Map<String, Administrateur> admins = new HashMap<>();
-    private static MoteurSuggestionAvancee moteurSuggestion = new MoteurSuggestionAvancee("Moteur Avancé");
+
     
     public static void main(String[] args) {
         initialiserDonnees();
@@ -32,13 +31,11 @@ public class SmartGroceryStoreManager {
             int choix = lireEntier("Votre choix: ");
             
             switch (choix) {
+
                 case 1:
-                    menuClient();
-                    break;
-                case 2:
                     menuAdministrateur();
                     break;
-                case 3:
+                case 2:
                     System.out.println("\n   Merci d'avoir utilisé Smart Grocery Store Manager!");
                     continuer = false;
                     break;
@@ -50,118 +47,11 @@ public class SmartGroceryStoreManager {
         scanner.close();
     }
     
-    private static void creerCompteClient() {
-        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("   ║              CRÉATION DE COMPTE CLIENT                    ║");
-        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
-        
-        String id = "C" + String.format("%04d", clients.size() + 1);
-        System.out.print("   Nom complet: ");
-        String nom = scanner.nextLine();
-        System.out.print("   Email: ");
-        String email = scanner.nextLine();
-        System.out.print("   Mot de passe: ");
-        String motDePasse = scanner.nextLine();
-        
-        Client client = new Client(id, nom, email, motDePasse);
-        clients.put(id, client);
-        
-        System.out.println("\n   ✓ Compte créé avec succès!");
-        System.out.println("   Votre ID client: " + id);
-        pauseEtContinuer();
-    }
-    
-    private static void connexionClient() {
-        System.out.print("\n   ID Client: ");
-        String id = scanner.nextLine();
-        System.out.print("   Mot de passe: ");
-        String motDePasse = scanner.nextLine();
-        
-        Client client = clients.get(id);
-        
-        if (client != null && client.getMotDePasse().equals(motDePasse)) {
-            client.connecter();
-            menuClientConnecte(client);
-        } else {
-            System.out.println("\n   ✗ Identifiants incorrects!");
-            pauseEtContinuer();
-        }
-    }
-    
-    private static void menuClientConnecte(Client client) {
-        boolean continuer = true;
-        
-        while (continuer) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
-            System.out.println("║               MENU CLIENT - " + String.format("%-32s", client.getNom()) + " ║");
-            System.out.println("╠══════════════════════════════════════════════════════════════╣");
-            System.out.println("║  1. 🛍️  Voir tous les produits                               ║");
-            System.out.println("║  2. 🔍 Rechercher un produit                                 ║");
-            System.out.println("║  3. ➕ Ajouter au panier                                     ║");
-            System.out.println("║  4. 🛒 Voir mon panier                                       ║");
-            System.out.println("║  5. ✏️  Modifier quantité dans le panier                     ║");
-            System.out.println("║  6. 🗑️  Supprimer un article du panier                       ║");
-            System.out.println("║  7. 🧹 Vider le panier                                       ║");
-            System.out.println("║  8. 💳 Payer                                                 ║");
-            System.out.println("║  9. 📜 Historique d'achats                                   ║");
-            System.out.println("║  10. 🍳 Suggestions de recettes                            ║");
-            System.out.println("║  11. 💡 Suggestions de produits                            ║");
-            System.out.println("║  12. 🚪 Déconnexion                                          ║");
-            System.out.println("╚══════════════════════════════════════════════════════════════╝");
-            
-            int choix = lireEntier("Votre choix: ");
-            
-            switch (choix) {
-                case 1:
-                    inventaire.afficherTous();
-                    pauseEtContinuer();
-                    break;
-                case 2:
-                    rechercherProduit();
-                    break;
-                case 3:
-                    ajouterAuPanierClient(client);
-                    break;
-                case 4:
-                    client.getPanier().afficher();
-                    pauseEtContinuer();
-                    break;
-                case 5:
-                    modifierQuantitePanier(client);
-                    break;
-                case 6:
-                    supprimerDuPanier(client);
-                    break;
-                case 7:
-                    client.getPanier().vider();
-                    System.out.println("\n   ✓ Panier vidé!");
-                    pauseEtContinuer();
-                    break;
-                case 8:
-                    client.payer(caisse);
-                    pauseEtContinuer();
-                    break;
-                case 9:
-                    afficherHistoriqueClient(client);
-                    break;
-                case 10:
-                    afficherSuggestionsRecettes();
-                    break;
-                case 11:
-                    afficherSuggestionsProduits(client);
-                    break;
-                case 12:
-                    client.deconnecter();
-                    continuer = false;
-                    break;
-                default:
-                    System.out.println("\n   ✗ Choix invalide!");
-            }
-        }
-    }
-    
+
+
+
     private static void rechercherProduit() {
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
         System.out.println("   ║                  RECHERCHE DE PRODUIT                     ║");
         System.out.println("   ╠═══════════════════════════════════════════════════════════╣");
         System.out.println("   ║  1. Par nom                                               ║");
@@ -185,7 +75,7 @@ public class SmartGroceryStoreManager {
         if (resultats.isEmpty()) {
             System.out.println("\n   ℹ️ Aucun produit trouvé");
         } else {
-            System.out.println("\n   ╔═══════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("\n ╔═══════════════════════════════════════════════════════════════════════════════════════════╗");
             System.out.println("   ║                              RÉSULTATS DE LA RECHERCHE                                    ║");
             System.out.println("   ╚═══════════════════════════════════════════════════════════════════════════════════════════╝");
             for (ArticleEpicerie article : resultats) {
@@ -194,94 +84,8 @@ public class SmartGroceryStoreManager {
         }
         pauseEtContinuer();
     }
-    
-    private static void ajouterAuPanierClient(Client client) {
-        System.out.print("\n   ID de l'article: ");
-        String id = scanner.nextLine();
-        
-        ArticleEpicerie article = inventaire.getArticle(id);
-        
-        if (article == null) {
-            System.out.println("   ✗ Article non trouvé!");
-            pauseEtContinuer();
-            return;
-        }
-        
-        System.out.println("\n   Article: " + article.getNom());
-        System.out.println("   Prix: " + article.getPrix() + "€");
-        System.out.println("   Stock disponible: " + article.getQuantiteStock());
-        
-        int quantite = lireEntier("\n   Quantité: ");
-        
-        if (quantite > 0) {
-            client.ajouterAuPanier(article, quantite);
-        } else {
-            System.out.println("   ✗ Quantité invalide!");
-        }
-        pauseEtContinuer();
-    }
-    
-    private static void modifierQuantitePanier(Client client) {
-        if (client.getPanier().estVide()) {
-            System.out.println("\n   ℹ️ Votre panier est vide");
-            pauseEtContinuer();
-            return;
-        }
-        
-        client.getPanier().afficher();
-        
-        System.out.print("\n   ID de l'article à modifier: ");
-        String id = scanner.nextLine();
-        
-        int nouvelleQuantite = lireEntier("   Nouvelle quantité: ");
-        
-        if (nouvelleQuantite > 0) {
-            client.getPanier().modifierQuantite(id, nouvelleQuantite);
-            System.out.println("   ✓ Quantité modifiée!");
-        } else {
-            System.out.println("   ✗ Quantité invalide!");
-        }
-        pauseEtContinuer();
-    }
-    
-    private static void supprimerDuPanier(Client client) {
-        if (client.getPanier().estVide()) {
-            System.out.println("\n   ℹ️ Votre panier est vide");
-            pauseEtContinuer();
-            return;
-        }
-        
-        client.getPanier().afficher();
-        
-        System.out.print("\n   ID de l'article à supprimer: ");
-        String id = scanner.nextLine();
-        
-        client.getPanier().supprimerArticle(id);
-        System.out.println("   ✓ Article supprimé du panier!");
-        pauseEtContinuer();
-    }
-    
-    private static void afficherHistoriqueClient(Client client) {
-        List<Vente> historique = client.getHistorique();
-        
-        if (historique.isEmpty()) {
-            System.out.println("\n   ℹ️ Aucun achat dans l'historique");
-        } else {
-            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
-            System.out.println("   ║                 HISTORIQUE D'ACHATS                       ║");
-            System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
-            
-            for (Vente vente : historique) {
-                System.out.println("\n   Vente ID: " + vente.getIdVente());
-                System.out.println("   Date: " + vente.getDate());
-                System.out.println("   Total: " + String.format("%.2f€", vente.getTotal()));
-                System.out.println("   Articles: " + vente.getArticles().size());
-                System.out.println("   " + "-".repeat(60));
-            }
-        }
-        pauseEtContinuer();
-    }
-    
+   
+   
     // ==================== MENU ADMINISTRATEUR ====================
     private static void menuAdministrateur() {
         boolean continuer = true;
@@ -313,7 +117,7 @@ public class SmartGroceryStoreManager {
     }
     
     private static void creerCompteAdmin() {
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
         System.out.println("   ║          CRÉATION DE COMPTE ADMINISTRATEUR                ║");
         System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
         
@@ -365,9 +169,7 @@ public class SmartGroceryStoreManager {
             System.out.println("║  6. 📊 Générer un rapport                                    ║");
             System.out.println("║  7. 💰 Voir les ventes du jour                               ║");
             System.out.println("║  8. ⚠️  Vérifier les articles périmés                         ║");
-            System.out.println("║  9. 👥 Liste des clients                                     ║");
-            System.out.println("║  10. 🤖 Suggestions IA                                       ║");
-            System.out.println("║  11. 🚪 Déconnexion                                          ║");
+            System.out.println("║  9. 🚪 Déconnexion                                          ║");
             System.out.println("╚══════════════════════════════════════════════════════════════╝");
             
             int choix = lireEntier("Votre choix: ");
@@ -400,12 +202,6 @@ public class SmartGroceryStoreManager {
                     verifierArticlesPerimes();
                     break;
                 case 9:
-                    afficherListeClients();
-                    break;
-                case 10:
-                    afficherSuggestionsIA(admin);
-                    break;
-                case 11:
                     admin.deconnecter();
                     continuer = false;
                     break;
@@ -416,7 +212,7 @@ public class SmartGroceryStoreManager {
     }
     
     private static void ajouterArticleAdmin(Administrateur admin) {
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
         System.out.println("   ║                   AJOUTER UN ARTICLE                      ║");
         System.out.println("   ╠═══════════════════════════════════════════════════════════╣");
         System.out.println("   ║  1. Article périssable                                    ║");
@@ -521,7 +317,7 @@ public class SmartGroceryStoreManager {
         if (ventes.isEmpty()) {
             System.out.println("\n   ℹ️ Aucune vente aujourd'hui");
         } else {
-            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
             System.out.println("   ║                  VENTES DU JOUR                           ║");
             System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
             
@@ -544,7 +340,7 @@ public class SmartGroceryStoreManager {
         if (perimes.isEmpty()) {
             System.out.println("\n   ✓ Aucun article périmé");
         } else {
-            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
             System.out.println("   ║              ⚠️  ARTICLES PÉRIMÉS  ⚠️                      ║");
             System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
             
@@ -555,8 +351,7 @@ public class SmartGroceryStoreManager {
             System.out.println("\n   Total: " + perimes.size() + " article(s) périmé(s)");
         }
         
-        // Afficher aussi les articles qui vont bientôt expirer
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
         System.out.println("   ║           ARTICLES PROCHES DE L'EXPIRATION                ║");
         System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
         
@@ -578,131 +373,10 @@ public class SmartGroceryStoreManager {
         pauseEtContinuer();
     }
     
-    private static void afficherListeClients() {
-        if (clients.isEmpty()) {
-            System.out.println("\n   ℹ️ Aucun client enregistré");
-        } else {
-            System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
-            System.out.println("   ║                    LISTE DES CLIENTS                      ║");
-            System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
-            
-            for (Client client : clients.values()) {
-                System.out.println(String.format("   ID: %s | Nom: %-30s | Email: %s", 
-                    client.getId(), client.getNom(), client.getEmail()));
-                System.out.println("   Achats effectués: " + client.getHistorique().size());
-                System.out.println("   " + "-".repeat(60));
-            }
-            
-            System.out.println("\n   Total clients: " + clients.size());
-        }
-        pauseEtContinuer();
-    }
+
     
-    // ==================== MÉTHODES IA ET SUGGESTIONS ====================
-    private static void afficherSuggestionsRecettes() {
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("   ║              SUGGESTIONS DE RECETTES                      ║");
-        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
-        
-        List<Recette> recettes = moteurSuggestion.suggererRecettes(inventaire);
-        
-        if (recettes.isEmpty()) {
-            System.out.println("\n   ℹ️ Aucune recette suggérée pour le moment");
-        } else {
-            for (Recette recette : recettes) {
-                System.out.println("\n   📖 " + recette.getNom());
-                System.out.println("   ⏱️  Temps de préparation: " + recette.getTempsPreparation() + " minutes");
-                if (!recette.getIngredients().isEmpty()) {
-                    System.out.println("   🥘 Ingrédients nécessaires:");
-                    for (ArticleEpicerie ingredient : recette.getIngredients()) {
-                        System.out.println("      - " + ingredient.getNom() + " (" + ingredient.getPrix() + "€)");
-                    }
-                } else {
-                    System.out.println("   ℹ️  Ingrédients disponibles dans l'inventaire");
-                }
-                System.out.println("   " + "-".repeat(60));
-            }
-        }
-        pauseEtContinuer();
-    }
-    
-    private static void afficherSuggestionsProduits(Client client) {
-        System.out.println("\n ╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("   ║            SUGGESTIONS DE PRODUITS PERSONNALISÉES         ║");
-        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
-        
-        // Suggestions basées sur l'historique
-        List<String> suggestionsClient = moteurSuggestion.getSuggestionsClient(client, new ArrayList<>());
-        
-        System.out.println("\n   💡 Suggestions pour vous:");
-        for (String suggestion : suggestionsClient) {
-            System.out.println("   • " + suggestion);
-        }
-        
-        // Suggestions de produits proches de l'expiration (promotions)
-        List<ArticleEpicerie> articlesProchesExpiration = new ArrayList<>();
-        for (ArticleEpicerie article : inventaire.getArticles().values()) {
-            if (article instanceof ArticlePerissable) {
-                ArticlePerissable perissable = (ArticlePerissable) article;
-                if (!perissable.estPerime() && perissable.getJoursRestants() <= 7) {
-                    articlesProchesExpiration.add(article);
-                }
-            }
-        }
-        
-        if (!articlesProchesExpiration.isEmpty()) {
-            List<ArticleEpicerie> suggestionsPromo = moteurSuggestion.suggererPromotions(articlesProchesExpiration);
-            System.out.println("\n   🏷️  Promotions suggérées (articles proches de l'expiration):");
-            for (ArticleEpicerie article : suggestionsPromo) {
-                System.out.println("   • " + article.getNom() + " - " + article.getPrix() + "€");
-                if (article instanceof ArticlePerissable) {
-                    ArticlePerissable perissable = (ArticlePerissable) article;
-                    System.out.println("     ⚠️  Expire dans " + perissable.getJoursRestants() + " jours");
-                }
-            }
-        }
-        
-        pauseEtContinuer();
-    }
-    
-    private static void afficherSuggestionsIA(Administrateur admin) {
-        System.out.println("\n   ╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("   ║                  SUGGESTIONS IA                          ║");
-        System.out.println("   ╚═══════════════════════════════════════════════════════════╝");
-        
-        // Suggestions pour l'administrateur
-        List<String> suggestionsAdmin = moteurSuggestion.getSuggestionsAdmin(new ArrayList<>());
-        
-        System.out.println("\n   🤖 Suggestions de gestion:");
-        for (String suggestion : suggestionsAdmin) {
-            System.out.println("   • " + suggestion);
-        }
-        
-        // Suggestions de recettes
-        List<Recette> recettes = moteurSuggestion.suggererRecettes(inventaire);
-        if (!recettes.isEmpty()) {
-            System.out.println("\n   🍳 Recettes suggérées pour promouvoir:");
-            for (Recette recette : recettes) {
-                System.out.println("   • " + recette.getNom() + " (" + recette.getTempsPreparation() + " min)");
-            }
-        }
-        
-        // Suggestions de promotions basées sur les articles proches de l'expiration
-        List<ArticleEpicerie> articlesPerimes = inventaire.iterArticlesPerimes();
-        if (!articlesPerimes.isEmpty()) {
-            List<ArticleEpicerie> suggestionsPeremption = moteurSuggestion.suggererParPeremption(articlesPerimes);
-            System.out.println("\n   ⚠️  Articles à promouvoir (proches de l'expiration):");
-            for (ArticleEpicerie article : suggestionsPeremption) {
-                System.out.println("   • " + article.getNom() + " - " + article.getPrix() + "€");
-            }
-        }
-        
-        pauseEtContinuer();
-    }
-    
-    // ==================== MÉTHODES UTILITAIRES ====================
+    // methode pour mieux gerer le menu
     private static void initialiserDonnees() {
-        // Créer des articles de démonstration
         ArticlePerissable lait = new ArticlePerissable(
             "A001", "Lait demi-écrémé 1L", 1.50, 50, "Produits laitiers", 
             LocalDate.now().plusDays(5)
@@ -749,15 +423,10 @@ public class SmartGroceryStoreManager {
         inventaire.ajouterArticle(huile);
         inventaire.ajouterArticle(tomates);
         
-        // Créer un administrateur par défaut
         Administrateur adminDefault = new Administrateur("A0001", "Admin Principal", "admin@store.com", "admin123");
         admins.put("A0001", adminDefault);
-        
-        // Créer un client de test
-        Client clientTest = new Client("C0001", "Jean Dupont", "jean@email.com", "client123");
-        clients.put("C0001", clientTest);
     }
-    
+        
     private static int lireEntier(String message) {
         System.out.print(message);
         while (!scanner.hasNextInt()) {
@@ -765,7 +434,7 @@ public class SmartGroceryStoreManager {
             System.out.print("   ✗ Veuillez entrer un nombre valide: ");
         }
         int valeur = scanner.nextInt();
-        scanner.nextLine(); // Consommer le retour à la ligne
+        scanner.nextLine(); 
         return valeur;
     }
     
@@ -776,7 +445,7 @@ public class SmartGroceryStoreManager {
             System.out.print("   ✗ Veuillez entrer un nombre valide: ");
         }
         double valeur = scanner.nextDouble();
-        scanner.nextLine(); // Consommer le retour à la ligne
+        scanner.nextLine(); 
         return valeur;
     }
     
@@ -788,9 +457,8 @@ public class SmartGroceryStoreManager {
     private static void afficherBanniere() {
         System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                              ║");
-        System.out.println("║        🛒  SMART GROCERY STORE MANAGER  🛒                   ║");
+        System.out.println("║                Système de Gestion d'Épicerie                 ║");
         System.out.println("║                                                              ║");
-        System.out.println("║              Système de Gestion d'Épicerie                   ║");
         System.out.println("║                                                              ║");
         System.out.println("╚══════════════════════════════════════════════════════════════╝");
     }
@@ -799,39 +467,8 @@ public class SmartGroceryStoreManager {
         System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
         System.out.println("║                      MENU PRINCIPAL                          ║");
         System.out.println("╠══════════════════════════════════════════════════════════════╣");
-        System.out.println("║  1. 👤 Espace Client                                         ║");
-        System.out.println("║  2. 👨‍💼 Espace Administrateur                                 ║");
-        System.out.println("║  3. 🚪 Quitter                                                ║");
+        System.out.println("║  1. 👨‍💼 Espace Administrateur                                 ║");
+        System.out.println("║  2. 🚪 Quitter                                               ║");
         System.out.println("╚══════════════════════════════════════════════════════════════╝");
-    }
-    
-    // ==================== MENU CLIENT ====================
-    private static void menuClient() {
-        boolean continuer = true;
-        while (continuer) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
-            System.out.println("║                     ESPACE CLIENT                            ║");
-            System.out.println("╠══════════════════════════════════════════════════════════════╣");
-            System.out.println("║  1. 📝 Créer un nouveau compte                               ║");
-            System.out.println("║  2. 🔐 Se connecter                                          ║");
-            System.out.println("║  3. 🔙 Retour                                                ║");
-            System.out.println("╚══════════════════════════════════════════════════════════════╝");
-            
-            int choix = lireEntier("Votre choix: ");
-            
-            switch (choix) {
-                case 1:
-                    creerCompteClient();
-                    break;
-                case 2:
-                    connexionClient();
-                    break;
-                case 3:
-                    continuer = false;
-                    break;
-                default:
-                    System.out.println("\n   ✗ Choix invalide!");
-            }
-        }
     }
 }

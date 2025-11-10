@@ -57,7 +57,7 @@ public class Panier {
             return;
         }
         
-        System.out.println("\n   ╔════════════════════════════════════════════════════════════╗");
+        System.out.println("\n ╔════════════════════════════════════════════════════════════╗");
         System.out.println("   ║                    CONTENU DU PANIER                       ║");
         System.out.println("   ╠════════════════════════════════════════════════════════════╣");
         
