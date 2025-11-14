@@ -2,8 +2,6 @@ package Mainoo;
 
 import InventaireArticle.*;
 import UtilisateurApplication.*;
-import IA.*;
-import Recette.*;
 import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.Map;
