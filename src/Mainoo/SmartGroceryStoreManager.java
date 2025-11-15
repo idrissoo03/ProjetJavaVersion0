@@ -29,12 +29,11 @@ public class SmartGroceryStoreManager {
             int choix = lireEntier("Votre choix: ");
             
             switch (choix) {
-
                 case 1:
                     menuAdministrateur();
                     break;
                 case 2:
-                    System.out.println("\n   Merci d'avoir utilisé Smart Grocery Store Manager!");
+                    System.out.println("\n   Merci d'avoir utilisé Notre System!");
                     continuer = false;
                     break;
                 default:
@@ -161,13 +160,14 @@ public class SmartGroceryStoreManager {
             System.out.println("╠══════════════════════════════════════════════════════════════╣");
             System.out.println("║  1. 📦 Voir l'inventaire complet                             ║");
             System.out.println("║  2. ➕ Ajouter un article                                    ║");
-            System.out.println("║  3. ✏️  Modifier un article                                   ║");
-            System.out.println("║  4. 🗑️  Supprimer un article                                  ║");
+            System.out.println("║  3. ✏️  Modifier un article                                  ║");
+            System.out.println("║  4. 🗑️  Supprimer un article                                 ║");
             System.out.println("║  5. 🔍 Rechercher un article                                 ║");
-            System.out.println("║  6. 📊 Générer un rapport                                    ║");
-            System.out.println("║  7. 💰 Voir les ventes du jour                               ║");
-            System.out.println("║  8. ⚠️  Vérifier les articles périmés                         ║");
-            System.out.println("║  9. 🚪 Déconnexion                                          ║");
+            System.out.println("║  6. 🛒 Gérer une vente                                       ║");
+            System.out.println("║  7. 📊 Générer un rapport                                    ║");
+            System.out.println("║  8. 💰 Voir les ventes du jour                               ║");
+            System.out.println("║  9. ⚠️  Vérifier les articles périmés                        ║");
+            System.out.println("║ 10. 🚪 Déconnexion                                           ║");
             System.out.println("╚══════════════════════════════════════════════════════════════╝");
             
             int choix = lireEntier("Votre choix: ");
@@ -190,16 +190,19 @@ public class SmartGroceryStoreManager {
                     rechercherProduit();
                     break;
                 case 6:
+                    gererVente(admin);
+                    break;
+                case 7:
                     admin.genererRapport(caisse, inventaire);
                     pauseEtContinuer();
                     break;
-                case 7:
+                case 8:
                     afficherVentesJour();
                     break;
-                case 8:
+                case 9:
                     verifierArticlesPerimes();
                     break;
-                case 9:
+                case 10:
                     admin.deconnecter();
                     continuer = false;
                     break;
@@ -421,8 +424,8 @@ public class SmartGroceryStoreManager {
         inventaire.ajouterArticle(huile);
         inventaire.ajouterArticle(tomates);
         
-        Administrateur adminDefault = new Administrateur("A0001", "Admin Principal", "admin@store.com", "admin123");
-        admins.put("A0001", adminDefault);
+        Administrateur adminDefault = new Administrateur("idriss", "Admin Principal", "admin@store.com", "idriss123");
+        admins.put("idriss", adminDefault);
     }
         
     private static int lireEntier(String message) {
@@ -459,6 +462,318 @@ public class SmartGroceryStoreManager {
         System.out.println("║                                                              ║");
         System.out.println("║                                                              ║");
         System.out.println("╚══════════════════════════════════════════════════════════════╝");
+    }
+    
+    // ==================== GESTION DES VENTES (ADMINISTRATEUR) ====================
+    private static void gererVente(Administrateur admin) {
+        Panier panierVente = new Panier();
+        boolean continuer = true;
+        
+        while (continuer) {
+            System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
+            System.out.println("║              GESTION D'UNE VENTE                              ║");
+            System.out.println("╠══════════════════════════════════════════════════════════════╣");
+            System.out.println("║  1. 📋 Voir les produits disponibles                        ║");
+            System.out.println("║  2. 🔍 Rechercher un produit                                ║");
+            System.out.println("║  3. ➕ Ajouter un article au panier                         ║");
+            System.out.println("║  4. 📦 Voir le panier actuel                                ║");
+            System.out.println("║  5. ✏️  Modifier le panier                                  ║");
+            System.out.println("║  6. 💳 Finaliser la vente et payer                          ║");
+            System.out.println("║  7. ❌ Annuler la vente                                     ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════╝");
+            
+            int choix = lireEntier("Votre choix: ");
+            
+            switch (choix) {
+                case 1:
+                    afficherProduitsDisponiblesVente();
+                    break;
+                case 2:
+                    rechercherProduitVente();
+                    break;
+                case 3:
+                    ajouterAuPanierVente(panierVente);
+                    break;
+                case 4:
+                    panierVente.afficher();
+                    pauseEtContinuer();
+                    break;
+                case 5:
+                    modifierPanierVente(panierVente);
+                    break;
+                case 6:
+                    finaliserVente(panierVente, admin);
+                    continuer = false;
+                    break;
+                case 7:
+                    System.out.println("\n   ℹ️ Vente annulée");
+                    continuer = false;
+                    break;
+                default:
+                    System.out.println("\n   ✗ Choix invalide!");
+            }
+        }
+    }
+    
+    private static void afficherProduitsDisponiblesVente() {
+        System.out.println("\n ╔═════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("   ║                          PRODUITS DISPONIBLES                                                ║");
+        System.out.println("   ╚═════════════════════════════════════════════════════════════════════════════════════════════╝");
+        
+        boolean aucunProduit = true;
+        for (ArticleEpicerie article : inventaire.getArticles().values()) {
+            if (article.getQuantiteStock() > 0) {
+                System.out.println("   " + article);
+                aucunProduit = false;
+            }
+        }
+        
+        if (aucunProduit) {
+            System.out.println("   ℹ️ Aucun produit disponible pour le moment");
+        }
+        
+        pauseEtContinuer();
+    }
+    
+    private static void rechercherProduitVente() {
+        System.out.println("\n ╔═════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("   ║                        RECHERCHE DE PRODUIT                                                  ║");
+        System.out.println("   ╚═════════════════════════════════════════════════════════════════════════════════════════════╝");
+        System.out.println("   ║  1. Par nom                                                       ║");
+        System.out.println("   ║  2. Par catégorie                                                 ║");
+        System.out.println("   ╚═════════════════════════════════════════════════════════════════════════════════════════════╝");
+        
+        int choix = lireEntier("Votre choix: ");
+        
+        List<ArticleEpicerie> resultats = new ArrayList<>();
+        
+        if (choix == 1) {
+            System.out.print("\n   Nom du produit: ");
+            String nom = scanner.nextLine();
+            resultats = inventaire.rechercherParNom(nom);
+        } else if (choix == 2) {
+            System.out.print("\n   Catégorie: ");
+            String categorie = scanner.nextLine();
+            resultats = inventaire.rechercherParCategorie(categorie);
+        }
+        
+        // Filtrer pour ne montrer que les produits en stock
+        resultats.removeIf(article -> article.getQuantiteStock() <= 0);
+        
+        if (resultats.isEmpty()) {
+            System.out.println("\n   ℹ️ Aucun produit disponible trouvé");
+        } else {
+            System.out.println("\n ╔═════════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("   ║                            RÉSULTATS DE LA RECHERCHE                                        ║");
+            System.out.println("   ╚═════════════════════════════════════════════════════════════════════════════════════════════╝");
+            for (ArticleEpicerie article : resultats) {
+                System.out.println("   " + article);
+            }
+        }
+        pauseEtContinuer();
+    }
+    
+    private static void ajouterAuPanierVente(Panier panier) {
+        System.out.print("\n   ID du produit à ajouter: ");
+        String id = scanner.nextLine();
+        
+        ArticleEpicerie article = inventaire.getArticle(id);
+        
+        if (article == null) {
+            System.out.println("\n   ✗ Produit non trouvé!");
+            pauseEtContinuer();
+            return;
+        }
+        
+        if (article.getQuantiteStock() <= 0) {
+            System.out.println("\n   ✗ Ce produit n'est plus en stock!");
+            pauseEtContinuer();
+            return;
+        }
+        
+        System.out.println("\n   Produit: " + article.getNom());
+        System.out.println("   Prix unitaire: " + String.format("%.2f€", article.getPrix()));
+        System.out.println("   Stock disponible: " + article.getQuantiteStock());
+        
+        int quantite = lireEntier("\n   Quantité à ajouter: ");
+        
+        if (quantite <= 0) {
+            System.out.println("\n   ✗ Quantité invalide!");
+            pauseEtContinuer();
+            return;
+        }
+        
+        if (quantite > article.getQuantiteStock()) {
+            System.out.println("\n   ✗ Stock insuffisant! Stock disponible: " + article.getQuantiteStock());
+            pauseEtContinuer();
+            return;
+        }
+        
+        panier.ajouterArticle(article, quantite);
+        System.out.println("\n   ✓ " + quantite + " x " + article.getNom() + " ajouté(s) au panier!");
+        pauseEtContinuer();
+    }
+    
+    private static void modifierPanierVente(Panier panier) {
+        if (panier.estVide()) {
+            System.out.println("\n   ℹ️ Le panier est vide");
+            pauseEtContinuer();
+            return;
+        }
+        
+        panier.afficher();
+        
+        System.out.println("\n ╔══════════════════════════════════════════════════════════════╗");
+        System.out.println("   ║              MODIFICATION DU PANIER                          ║");
+        System.out.println("   ╠══════════════════════════════════════════════════════════════╣");
+        System.out.println("   ║  1. Modifier la quantité d'un article                       ║");
+        System.out.println("   ║  2. Supprimer un article                                    ║");
+        System.out.println("   ║  3. Vider le panier                                         ║");
+        System.out.println("   ╚══════════════════════════════════════════════════════════════╝");
+        
+        int choix = lireEntier("Votre choix: ");
+        
+        switch (choix) {
+            case 1:
+                System.out.print("\n   ID de l'article à modifier: ");
+                String idModif = scanner.nextLine();
+                
+                ArticleEpicerie articleModif = inventaire.getArticle(idModif);
+                if (articleModif == null) {
+                    System.out.println("\n   ✗ Article non trouvé!");
+                    pauseEtContinuer();
+                    return;
+                }
+                
+                // Trouver la quantité actuelle dans le panier
+                int quantiteActuelle = 0;
+                for (LignePanier ligne : panier.getLignes()) {
+                    if (ligne.getArticle().getId().equals(idModif)) {
+                        quantiteActuelle = ligne.getQuantite();
+                        break;
+                    }
+                }
+                
+                if (quantiteActuelle == 0) {
+                    System.out.println("\n   ✗ Cet article n'est pas dans le panier!");
+                    pauseEtContinuer();
+                    return;
+                }
+                
+                System.out.println("   Quantité actuelle: " + quantiteActuelle);
+                System.out.println("   Stock disponible: " + articleModif.getQuantiteStock());
+                
+                int nouvelleQuantite = lireEntier("   Nouvelle quantité: ");
+                
+                if (nouvelleQuantite <= 0) {
+                    panier.supprimerArticle(idModif);
+                    System.out.println("\n   ✓ Article supprimé du panier");
+                } else if (nouvelleQuantite > articleModif.getQuantiteStock()) {
+                    System.out.println("\n   ✗ Stock insuffisant! Stock disponible: " + articleModif.getQuantiteStock());
+                } else {
+                    panier.modifierQuantite(idModif, nouvelleQuantite);
+                    System.out.println("\n   ✓ Quantité modifiée avec succès!");
+                }
+                break;
+                
+            case 2:
+                System.out.print("\n   ID de l'article à supprimer: ");
+                String idSuppr = scanner.nextLine();
+                panier.supprimerArticle(idSuppr);
+                System.out.println("\n   ✓ Article supprimé du panier");
+                break;
+                
+            case 3:
+                System.out.print("\n   Confirmer la suppression de tous les articles? (O/N): ");
+                String confirmation = scanner.nextLine();
+                if (confirmation.equalsIgnoreCase("O")) {
+                    panier.vider();
+                    System.out.println("\n   ✓ Panier vidé");
+                } else {
+                    System.out.println("\n   Opération annulée");
+                }
+                break;
+                
+            default:
+                System.out.println("\n   ✗ Choix invalide!");
+        }
+        
+        pauseEtContinuer();
+    }
+    
+    private static void finaliserVente(Panier panier, Administrateur admin) {
+        if (panier.estVide()) {
+            System.out.println("\n   ℹ️ Le panier est vide. Ajoutez des produits avant de finaliser la vente.");
+            pauseEtContinuer();
+            return;
+        }
+        
+        // Afficher le récapitulatif du panier
+        panier.afficher();
+        
+        // Calculer le total avec TVA
+        double sousTotal = panier.getTotal();
+        double tva = sousTotal * 0.20;
+        double totalAvecTVA = sousTotal + tva;
+        
+        System.out.println("\n   ╔════════════════════════════════════════════════════════════╗");
+        System.out.println("   ║                    RÉCAPITULATIF                            ║");
+        System.out.println("   ╠════════════════════════════════════════════════════════════╣");
+        System.out.printf("   ║ Sous-total:                                 %10.2f€ ║%n", sousTotal);
+        System.out.printf("   ║ TVA (20%%):                                  %10.2f€ ║%n", tva);
+        System.out.printf("   ║ TOTAL À PAYER:                              %10.2f€ ║%n", totalAvecTVA);
+        System.out.println("   ╚════════════════════════════════════════════════════════════╝");
+        
+        System.out.print("\n   Confirmer et finaliser la vente? (O/N): ");
+        String confirmation = scanner.nextLine();
+        
+        if (!confirmation.equalsIgnoreCase("O")) {
+            System.out.println("\n   Vente annulée");
+            pauseEtContinuer();
+            return;
+        }
+        
+        // Vérifier à nouveau le stock avant le paiement
+        boolean stockInsuffisant = false;
+        StringBuilder messageErreur = new StringBuilder();
+        
+        for (LignePanier ligne : panier.getLignes()) {
+            ArticleEpicerie article = inventaire.getArticle(ligne.getArticle().getId());
+            if (article == null || !article.estDisponible(ligne.getQuantite())) {
+                stockInsuffisant = true;
+                if (article != null) {
+                    messageErreur.append("\n   ✗ ").append(article.getNom())
+                                 .append(": Stock insuffisant (disponible: ")
+                                 .append(article.getQuantiteStock()).append(")");
+                } else {
+                    messageErreur.append("\n   ✗ Article introuvable dans l'inventaire");
+                }
+            }
+        }
+        
+        if (stockInsuffisant) {
+            System.out.println("\n   ⚠️  Impossible de finaliser la vente:");
+            System.out.println(messageErreur.toString());
+            pauseEtContinuer();
+            return;
+        }
+        
+        // Enregistrer la vente (cela mettra à jour le stock automatiquement)
+        Vente vente = caisse.enregistrerVente(panier, inventaire);
+        
+        if (vente == null) {
+            System.out.println("\n   ✗ Erreur lors de l'enregistrement de la vente!");
+            pauseEtContinuer();
+            return;
+        }
+        
+        // Afficher la facture
+        System.out.println("\n   ✓ Vente finalisée avec succès!");
+        System.out.println("   Le stock a été mis à jour automatiquement.");
+        System.out.println(vente.genererFacture());
+        
+        System.out.println("\n   ✓ Transaction enregistrée dans le système");
+        pauseEtContinuer();
     }
     
     private static void afficherMenuPrincipal() {

@@ -35,6 +35,12 @@ public class ArticleEpicerie {
         return quantiteStock >= qte;
     }
     
+    public void diminuerStock(int qte) {
+        if (qte > 0 && quantiteStock >= qte) {
+            quantiteStock -= qte;
+        }
+    }
+    
     @Override
     public String toString() {
         return String.format("ID: %s | %-20s | Prix: %6.2f€ | Stock: %4d | Catégorie: %s", 
