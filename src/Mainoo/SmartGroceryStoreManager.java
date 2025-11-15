@@ -159,11 +159,11 @@ public class SmartGroceryStoreManager {
             System.out.println("║             MENU ADMINISTRATEUR - " + String.format("%-23s", admin.getNom()) + " ║");
             System.out.println("╠══════════════════════════════════════════════════════════════╣");
             System.out.println("║  1. 📦 Voir l'inventaire complet                             ║");
-            System.out.println("║  2. ➕ Ajouter un article                                    ║");
-            System.out.println("║  3. ✏️  Modifier un article                                  ║");
-            System.out.println("║  4. 🗑️  Supprimer un article                                 ║");
-            System.out.println("║  5. 🔍 Rechercher un article                                 ║");
-            System.out.println("║  6. 🛒 Gérer une vente                                       ║");
+            System.out.println("║  2. 🛒 Gérer une vente                                       ║");
+            System.out.println("║  3. ➕ Ajouter un article                                    ║");
+            System.out.println("║  4. ✏️  Modifier un article                                  ║");
+            System.out.println("║  5. 🗑️  Supprimer un article                                 ║");
+            System.out.println("║  6. 🔍 Rechercher un article                                 ║");
             System.out.println("║  7. 📊 Générer un rapport                                    ║");
             System.out.println("║  8. 💰 Voir les ventes du jour                               ║");
             System.out.println("║  9. ⚠️  Vérifier les articles périmés                        ║");
@@ -178,20 +178,21 @@ public class SmartGroceryStoreManager {
                     pauseEtContinuer();
                     break;
                 case 2:
-                    ajouterArticleAdmin(admin);
-                    break;
-                case 3:
-                    modifierArticleAdmin(admin);
-                    break;
-                case 4:
-                    supprimerArticleAdmin(admin);
-                    break;
-                case 5:
-                    rechercherProduit();
-                    break;
-                case 6:
                     gererVente(admin);
                     break;
+                case 3:
+                    ajouterArticleAdmin(admin);
+                    break;
+                case 4:
+                    modifierArticleAdmin(admin);
+                    break;
+                case 5:
+                    supprimerArticleAdmin(admin);
+                    break;
+                case 6:
+                    rechercherProduit();
+                    break;
+
                 case 7:
                     admin.genererRapport(caisse, inventaire);
                     pauseEtContinuer();
@@ -470,16 +471,16 @@ public class SmartGroceryStoreManager {
         boolean continuer = true;
         
         while (continuer) {
-            System.out.println("\n╔══════════════════════════════════════════════════════════════╗");
-            System.out.println("║              GESTION D'UNE VENTE                              ║");
-            System.out.println("╠══════════════════════════════════════════════════════════════╣");
-            System.out.println("║  1. 📋 Voir les produits disponibles                        ║");
-            System.out.println("║  2. 🔍 Rechercher un produit                                ║");
-            System.out.println("║  3. ➕ Ajouter un article au panier                         ║");
-            System.out.println("║  4. 📦 Voir le panier actuel                                ║");
-            System.out.println("║  5. ✏️  Modifier le panier                                  ║");
-            System.out.println("║  6. 💳 Finaliser la vente et payer                          ║");
-            System.out.println("║  7. ❌ Annuler la vente                                     ║");
+            System.out.println("\n╔════════════════════════════════════════════════════════════╗");
+            System.out.println("║              GESTION D'UNE VENTE                             ║");
+            System.out.println("╠═════════════════════════════════════════════════════════════╣");
+            System.out.println("║  1. 📋 Voir les produits disponibles                         ║");
+            System.out.println("║  2. 🔍 Rechercher un produit                                 ║");
+            System.out.println("║  3. ➕ Ajouter un article au panier                          ║");
+            System.out.println("║  4. 📦 Voir le panier actuel                                 ║");
+            System.out.println("║  5. ✏️  Modifier le panier                                   ║");
+            System.out.println("║  6. 💳 Finaliser la vente et payer                           ║");
+            System.out.println("║  7. ❌ Annuler la vente                                      ║");
             System.out.println("╚══════════════════════════════════════════════════════════════╝");
             
             int choix = lireEntier("Votre choix: ");
