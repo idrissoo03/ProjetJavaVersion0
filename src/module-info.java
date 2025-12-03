@@ -5,5 +5,10 @@
  * 
  */
 module ProjetJavaVersion0 {
-	requires java.sql;
+
+
+    exports Mainoo;
+    exports InventaireArticle;
+    exports UtilisateurApplication;
+
 }

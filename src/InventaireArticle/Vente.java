@@ -20,10 +20,13 @@ public class Vente {
     
     public String getIdVente() { return idVente; }
     public LocalDate getDate() { return date; }
+    
     public List<LigneVente> getArticles() { return articles; }
     public double getTotal() { return total; }
     public double getTaxe() { return taxe; }
-    
+    public int getNombreArticles() {
+        return (articles != null) ? articles.size() : 0;
+    }    
     public void enregistrerVente(Panier panier) {
         for (LignePanier lignePanier : panier.getLignes()) {
             LigneVente ligneVente = new LigneVente(
@@ -47,25 +50,19 @@ public class Vente {
     
     public String genererFacture() {
         StringBuilder facture = new StringBuilder();
-        facture.append("\n   ╔════════════════════════════════════════════════════════════╗\n");
-        facture.append("   ║                         FACTURE                            ║\n");
-        facture.append("   ╠════════════════════════════════════════════════════════════╣\n");
-        facture.append(String.format("   ║ ID Vente: %-47s ║%n", idVente));
-        facture.append(String.format("   ║ Date: %-51s ║%n", date));
-        facture.append("   ╠════════════════════════════════════════════════════════════╣\n");
+        facture.append("                            FACTURE                            \n");
+        facture.append(String.format("    ID Vente: %-47s %n", idVente));
+        facture.append(String.format("    Date: %-51s %n", date));
         
         for (LigneVente ligne : articles) {
-            facture.append(String.format("   ║ %-30s x%-3d = %8.2f€ ║%n", 
+            facture.append(String.format("    %-30s x%-3d = %8.2f€ ║%n", 
                 ligne.getArticle().getNom(), 
                 ligne.getQuantite(), 
                 ligne.getSousTotal()));
         }
-        
-        facture.append("   ╠════════════════════════════════════════════════════════════╣\n");
-        facture.append(String.format("   ║ Sous-total:                                 %10.2f€ ║%n", total - taxe));
-        facture.append(String.format("   ║ TVA (20%%):                                  %10.2f€ ║%n", taxe));
-        facture.append(String.format("   ║ TOTAL:                                      %10.2f€ ║%n", total));
-        facture.append("   ╚════════════════════════════════════════════════════════════╝\n");
+        facture.append(String.format("   Sous-total:                                 %10.2f€ %n", total - taxe));
+        facture.append(String.format("    TVA (20%%):                                  %10.2f€ %n", taxe));
+        facture.append(String.format("    TOTAL:                                      %10.2f€ %n", total));
         
         return facture.toString();
     }

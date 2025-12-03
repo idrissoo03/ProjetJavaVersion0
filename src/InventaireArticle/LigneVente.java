@@ -1,6 +1,6 @@
 package InventaireArticle;
 
-class LigneVente {
+public class LigneVente {
     private ArticleEpicerie article;
     private int quantite;
     private double sousTotal;
